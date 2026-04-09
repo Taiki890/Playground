@@ -1,0 +1,10 @@
+{
+  "name": "禁煙記録",
+  "short_name": "禁煙記録",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#7b6630",
+  "theme_color": "#7b6630",
+  "lang": "ja",
+  "icons": []
+}
