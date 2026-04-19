@@ -3,42 +3,81 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#7b6630">
+  <meta name="theme-color" content="#121214">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>禁煙記録</title>
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="app-shell">
-    <section class="hero">
-      <p class="eyebrow">今日の記録</p>
-      <h1 id="today-date" class="today-date">----</h1>
+    <section id="view-home" class="view-home">
+      <h1 class="page-title">今日のログ</h1>
 
-      <div class="metric-block">
-        <p class="metric-label">経過時間</p>
-        <p id="elapsed-time" class="metric-value">--:--:--</p>
-      </div>
+      <section class="card card-count">
+        <p class="card-label">本日の本数</p>
+        <div class="count-row">
+          <p id="daily-count" class="count-value">0</p>
+          <p id="trend-arrow" class="trend-arrow" aria-label="トレンド">→</p>
+        </div>
+      </section>
 
-      <div class="metric-block count-block">
-        <p class="metric-label">当日の喫煙本数</p>
-        <p id="daily-count" class="daily-count">0</p>
-      </div>
+      <section class="metrics-grid">
+        <article class="card">
+          <p class="card-label">経過時間</p>
+          <p id="elapsed-time" class="metric-value">00:00:00</p>
+        </article>
+        <article class="card">
+          <p class="card-label">今月の金額</p>
+          <p id="monthly-cost" class="metric-value">0</p>
+        </article>
+      </section>
+
+      <section class="card history-card">
+        <div class="history-head">
+          <p class="card-label">履歴</p>
+          <p id="today-date" class="date-text">--/--</p>
+        </div>
+        <ol id="history-list" class="history-list"></ol>
+      </section>
+
+      <button id="increment-button" class="fab" type="button" aria-label="1本記録する">+</button>
     </section>
 
-    <section class="history-card">
-      <div class="history-header">
-        <h2>登録履歴</h2>
-        <p>最新10件</p>
-      </div>
-      <ol id="history-list" class="history-list"></ol>
-    </section>
+    <section id="view-settings" class="view-settings hidden">
+      <h2 class="settings-title">Settings</h2>
+      <p class="settings-sub">データ管理</p>
 
-    <button id="increment-button" class="increment-button" type="button" aria-label="喫煙を記録">
-      <span>+</span>
-    </button>
+      <section class="card settings-card">
+        <label for="pack-price-input" class="card-label">1箱あたり金額（円）</label>
+        <input id="pack-price-input" class="text-input" type="number" min="1" step="1" placeholder="600">
+        <button id="save-pack-price-button" class="action-button" type="button">保存</button>
+      </section>
+
+      <section class="card settings-card">
+        <p class="card-label">エクスポート</p>
+        <p class="note">記録と設定をJSONファイルとして保存します。</p>
+        <button id="export-button" class="action-button" type="button">エクスポート</button>
+      </section>
+
+      <section class="card settings-card">
+        <p class="card-label">インポート</p>
+        <p class="note">JSONファイルから記録と設定を復元します。</p>
+        <input id="import-file-input" class="text-input" type="file" accept="application/json">
+        <button id="import-button" class="action-button" type="button">インポート</button>
+      </section>
+    </section>
   </main>
+
+  <nav class="bottom-nav" aria-label="メインナビ">
+    <button class="nav-item is-active" data-view="home" type="button">Home</button>
+    <button class="nav-item" data-view="analysis" type="button" disabled>Analysis</button>
+    <button class="nav-item" data-view="trend" type="button" disabled>Trend</button>
+    <button class="nav-item" data-view="settings" type="button">Settings</button>
+  </nav>
 
   <script src="app.js"></script>
 </body>

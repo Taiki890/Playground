@@ -1,10 +1,13 @@
-const CACHE_NAME = "smoke-tracker-v1";
+const CACHE_NAME = "smoke-tracker-v4";
 const APP_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
+  "./icon-180.png",
+  "./icon-192.png",
+  "./icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
