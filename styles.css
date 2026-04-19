@@ -18,10 +18,13 @@ html,
 body {
   margin: 0;
   height: 100%;
+  min-height: 100dvh;
   background: radial-gradient(circle at 10% 20%, #1f2129 0%, var(--bg) 52%);
+  background-color: var(--bg);
   color: #f3f3f8;
   font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .hidden {
@@ -171,8 +174,20 @@ body {
   gap: 6px;
   padding: 10px 10px calc(env(safe-area-inset-bottom) + 10px);
   background: var(--nav-bg);
+  background-color: var(--nav-bg);
   border-top: 1px solid var(--nav-border);
   backdrop-filter: blur(10px);
+  z-index: 30;
+}
+
+.bottom-nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -40px;
+  height: 40px;
+  background: var(--nav-bg);
 }
 
 .nav-item {
