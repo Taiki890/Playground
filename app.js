@@ -11,6 +11,7 @@ const elapsedEl = document.getElementById("elapsed-time");
 const monthlyCostEl = document.getElementById("monthly-cost");
 const dailyCountEl = document.getElementById("daily-count");
 const trendArrowEl = document.getElementById("trend-arrow");
+const trendAverageEl = document.getElementById("trend-average");
 const historyListEl = document.getElementById("history-list");
 const incrementButton = document.getElementById("increment-button");
 const viewHomeEl = document.getElementById("view-home");
@@ -114,9 +115,10 @@ function calcTrendArrow(records, now = new Date()) {
   }
 
   const avg = baselineCounts.reduce((s, n) => s + n, 0) / TREND_LOOKBACK_DAYS;
-  if (todayCount > avg + 0.5) return "↑";
-  if (todayCount < avg - 0.5) return "↓";
-  return "→";
+  let arrow = "→";
+  if (todayCount > avg + 0.5) arrow = "↑";
+  if (todayCount < avg - 0.5) arrow = "↓";
+  return { arrow, average: avg };
 }
 
 function renderElapsedOnly() {
@@ -231,7 +233,9 @@ function renderHome() {
 
   dailyCountEl.textContent = String(todayCount);
   monthlyCostEl.textContent = numberFormatter.format(monthlyCost);
-  trendArrowEl.textContent = calcTrendArrow(currentRecords, now);
+  const trend = calcTrendArrow(currentRecords, now);
+  trendArrowEl.textContent = trend.arrow;
+  trendAverageEl.textContent = `avg ${trend.average.toFixed(1)}`;
   dateEl.textContent = dateFormatter.format(now);
 
   elapsedBaseTime = latestRecord ? new Date(latestRecord.createdAt).getTime() : null;
@@ -393,7 +397,11 @@ navItems.forEach((item) => {
 window.addEventListener("load", async () => {
   try {
     if ("serviceWorker" in navigator) {
-      await navigator.serviceWorker.register("./sw.js");
+      try {
+        await navigator.serviceWorker.register("./sw.js");
+      } catch (swError) {
+        console.warn("service worker registration skipped", swError);
+      }
     }
     await requestPersistentStorage();
     switchView("home");
