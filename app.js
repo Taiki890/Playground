@@ -2,7 +2,6 @@ const DB_NAME = "smoke-tracker-db";
 const RECORD_STORE = "records";
 const SETTINGS_STORE = "settings";
 const DB_VERSION = 3;
-const HISTORY_LIMIT = 10;
 const DEFAULT_PACK_PRICE = 600;
 const TREND_LOOKBACK_DAYS = 7;
 
@@ -313,8 +312,7 @@ function renderHome() {
 
   const recent = currentRecords
     .slice()
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, HISTORY_LIMIT);
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   historyListEl.innerHTML = "";
   if (recent.length === 0) {
@@ -376,7 +374,7 @@ function renderCalendar() {
 function renderDataList() {
   const records = getRecordsByDate(currentRecords, selectedDate)
     .slice()
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   dataRecordListEl.innerHTML = "";
   if (records.length === 0) {
