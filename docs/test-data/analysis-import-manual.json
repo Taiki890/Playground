@@ -1,0 +1,21 @@
+﻿{
+  "version": 2,
+  "exportedAt": "2026-04-25T08:00:00.000Z",
+  "settings": {
+    "packPrice": 620
+  },
+  "records": [
+    { "createdAt": "2026-02-28T12:00:00.000Z", "quantity": 9, "trendEligible": true },
+    { "createdAt": "2026-03-01T00:30:00.000Z", "quantity": 10, "trendEligible": true },
+
+    { "createdAt": "2026-03-09T08:10:00.000Z", "quantity": 2, "trendEligible": true },
+    { "createdAt": "2026-03-09T08:40:00.000Z", "quantity": 1, "trendEligible": false },
+    { "createdAt": "2026-03-11T22:00:00.000Z", "quantity": 3, "trendEligible": true },
+    { "createdAt": "2026-03-14T09:30:00.000Z", "quantity": 4, "trendEligible": true },
+
+    { "createdAt": "2026-03-15T06:00:00.000Z", "quantity": 5, "trendEligible": false },
+    { "createdAt": "2026-03-20T11:15:00.000Z", "quantity": 7, "trendEligible": true },
+
+    { "createdAt": "2026-04-01T09:00:00.000Z", "quantity": 8, "trendEligible": true }
+  ]
+}

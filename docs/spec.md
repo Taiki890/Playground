@@ -1,85 +1,57 @@
 # spec
 
-## 1. データモデル
+## 1. データ
 
-### 1.1 records
+- records:
+  - `createdAt`, `dayKey`, `quantity`, `trendEligible`
+- settings:
+  - `packPrice`
 
-- store: `records`
-- key: `id` (autoIncrement)
-- fields:
-  - `createdAt` (ISO 8601)
-  - `dayKey` (`YYYY-MM-DD`)
-  - `quantity` (integer, `>= 1`)
-  - `trendEligible` (boolean)
+## 2. Analysisモード
 
-### 1.2 settings
+### 2.1 共通
 
-- store: `settings`
-- key: `key`
-- fields:
-  - `packPrice` (integer, `>= 1`)
+- モード: `hour`, `week`, `month`
+- `analysisAnchor` で対象期間を管理
+- 前/次ボタンで対象期間を移動
 
-## 2. Home仕様（継続）
+### 2.2 週
 
-- `+` ボタンは `quantity=1`, `trendEligible=true`
-- トレンド矢印と平均値を表示
-- 履歴は降順で最大10件
+- 対象週（月〜日）の `quantity` 合計を日別で表示
+- 過去4週間の曜日別平均を重ねる
+- 表示形式: 棒（対象週） + 線（平均）
 
-## 3. Data仕様（新規）
+### 2.3 月
 
-### 3.1 表示
+- 対象月の日別 `quantity` 合計を表示
+- 過去4か月の日別平均を重ねる
+- 表示形式: 棒（対象月） + 線（平均）
+- 月金額:
+  - `floor((monthQuantity * packPrice) / 20)` を別カード表示
 
-- 上部: 月カレンダー
-- 下部: 選択日データ一覧
-- 初期選択日: 当日
+### 2.4 時間
 
-### 3.2 カレンダー
+- 対象期間: 1週間
+- フィルタ: `all`, `0..6`（曜日）
+- 時間帯別（0〜23時）の `quantity` 合計を表示
+- 過去4週間平均を重ねる
+- 表示形式: 線（対象週） + 線（平均）
+- 集計対象:
+  - `trendEligible=true` のみ
 
-- 表示月を前月/次月へ切り替え可能
-- 日付選択で下部リストを更新
-- 日付セルに当日・選択日スタイルを表示
-- 日付セルに当日の本数合計バッジを表示（存在時）
+## 3. Data CRUD（継続）
 
-### 3.3 一覧
+- 追加:
+  - `quantity=1`, `trendEligible=true`
+- 一括追加:
+  - `quantity>=2`, `trendEligible=false`
+- 変更:
+  - 時刻、本数、分析利用フラグ
+- 削除:
+  - 1件削除
 
-- 選択日のデータを時刻昇順で表示
-- 各行に表示:
-  - 時刻
-  - 本数
-  - 分析利用フラグ
-- 各行で `変更` と `削除` を実行可能
+## 4. 集計整合
 
-### 3.4 追加
-
-- `追加`:
-  - 選択日に1件追加
-  - `quantity=1`
-  - `trendEligible=true`
-- `一括追加`:
-  - 本数入力を受けて1件追加
-  - `quantity>=2`
-  - `trendEligible=false`
-
-### 3.5 変更
-
-- 時刻、本数、分析利用フラグを変更可能
-- 変更時は `dayKey` を `createdAt` から再算出
-
-### 3.6 削除
-
-- 確認ダイアログ後に1件削除
-
-## 4. 集計仕様
-
-- 当日本数/今月本数は `quantity` 合計
-- 今月金額:
-  - `monthlyCost = floor((monthlyCigarettes * packPrice) / 20)`
-- トレンド計算は `trendEligible=true` のみ対象
-
-## 5. 画面遷移仕様
-
-- Bottom nav:
-  - `Home` 遷移可
-  - `Data` 遷移可
-  - `Settings` 遷移可
-  - `Analysis` 無効
+- Homeの日次本数、月金額は Data編集結果を即時反映
+- 時間分析のみ `trendEligible=false` を除外
+- 週/月分析は `trendEligible` に関係なく含める

@@ -1,25 +1,23 @@
 # tasks
 
-## Phase 1: Dataタブ実装
+## Phase 1: Analysis実装
 
-- [x] Bottom nav の Trend を Data に変更
-- [x] Data画面のレイアウト追加
-- [x] 月カレンダー表示追加
-- [x] 日付選択ロジック追加（当日デフォルト）
-- [x] 選択日データ一覧表示
-- [x] 追加ボタン実装
-- [x] 一括追加ボタン実装
-- [x] 変更機能実装
-- [x] 削除機能実装
+- [x] Analysisタブ有効化
+- [x] 時間/週/月モード切替
+- [x] 期間移動（前/次）
+- [x] 週グラフ（対象週 + 過去4週間平均）
+- [x] 月グラフ（対象月 + 過去4か月平均）
+- [x] 月金額表示
+- [x] 時間グラフ（対象週 + 過去4週間平均）
+- [x] 曜日フィルタ（全日/各曜日）
 
-## Phase 2: 既存機能との整合
+## Phase 2: 分析品質補正
 
-- [x] Data操作とHome集計の連動
-- [x] trendEligibleによるトレンド除外反映
-- [x] Home/Settings/Data の遷移整理
+- [x] 時間分析では `trendEligible=false` を除外
+- [x] 週/月分析では `trendEligible=false` を含める
 
-## Phase 3: テスト
+## Phase 3: 検証
 
-- [ ] AC-01〜AC-08 の手動確認
-- [ ] DataでのCRUD後にHome表示更新を確認
-- [ ] export/import後にData表示が復元されることを確認
+- [ ] AC-A01〜AC-A07 の手動確認
+- [ ] iPhoneでグラフ描画確認
+- [ ] Data編集時のAnalysis再計算確認

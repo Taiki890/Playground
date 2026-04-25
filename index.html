@@ -50,6 +50,45 @@
       <button id="increment-button" class="fab" type="button" aria-label="1本記録する">+</button>
     </section>
 
+    <section id="view-analysis" class="view-analysis hidden">
+      <h2 class="settings-title">Analysis</h2>
+      <p class="settings-sub">傾向分析</p>
+
+      <section class="card">
+        <div class="mode-row">
+          <button class="mode-button is-active" data-analysis-mode="hour" type="button">時間</button>
+          <button class="mode-button" data-analysis-mode="week" type="button">週</button>
+          <button class="mode-button" data-analysis-mode="month" type="button">月</button>
+        </div>
+        <div class="calendar-head">
+          <button id="analysis-prev" class="mini-button" type="button" aria-label="前期間">‹</button>
+          <p id="analysis-period-label" class="calendar-month">----</p>
+          <button id="analysis-next" class="mini-button" type="button" aria-label="次期間">›</button>
+        </div>
+        <div id="analysis-weekday-row" class="weekday-row">
+          <button class="weekday-button is-active" data-weekday="all" type="button">全日</button>
+          <button class="weekday-button" data-weekday="1" type="button">月</button>
+          <button class="weekday-button" data-weekday="2" type="button">火</button>
+          <button class="weekday-button" data-weekday="3" type="button">水</button>
+          <button class="weekday-button" data-weekday="4" type="button">木</button>
+          <button class="weekday-button" data-weekday="5" type="button">金</button>
+          <button class="weekday-button" data-weekday="6" type="button">土</button>
+          <button class="weekday-button" data-weekday="0" type="button">日</button>
+        </div>
+        <canvas id="analysis-chart" class="analysis-chart" width="800" height="360"></canvas>
+        <div class="legend-row">
+          <span class="legend-item"><i class="legend-dot current"></i><span id="legend-current-text">対象期間</span></span>
+          <span class="legend-item"><i class="legend-dot average"></i><span id="legend-average-text">過去4期間平均</span></span>
+          <span id="legend-cumulative-item" class="legend-item hidden"><i class="legend-dot cumulative"></i><span id="legend-cumulative-text">その時間までの累計</span></span>
+        </div>
+      </section>
+
+      <section id="analysis-month-summary" class="card hidden">
+        <p class="card-label">選択月の金額</p>
+        <p id="analysis-month-cost" class="metric-value">0</p>
+      </section>
+    </section>
+
     <section id="view-data" class="view-data hidden">
       <h2 class="settings-title">Data</h2>
       <p class="settings-sub">過去データ管理</p>
@@ -106,7 +145,7 @@
 
   <nav class="bottom-nav" aria-label="メインナビ">
     <button class="nav-item is-active" data-view="home" type="button">Home</button>
-    <button class="nav-item" data-view="analysis" type="button" disabled>Analysis</button>
+    <button class="nav-item" data-view="analysis" type="button">Analysis</button>
     <button class="nav-item" data-view="data" type="button">Data</button>
     <button class="nav-item" data-view="settings" type="button">Settings</button>
   </nav>

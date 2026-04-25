@@ -48,6 +48,7 @@ body {
 }
 
 .view-data,
+.view-analysis,
 .view-settings {
   height: 100%;
   display: grid;
@@ -249,6 +250,76 @@ body {
 
 .settings-card {
   margin-bottom: 10px;
+}
+
+.mode-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mode-button,
+.weekday-button {
+  border: 0;
+  border-radius: 10px;
+  background: #dad6e8;
+  color: #3a3850;
+  height: 34px;
+  font-size: 0.85rem;
+}
+
+.mode-button.is-active,
+.weekday-button.is-active {
+  background: #7867dc;
+  color: #fff;
+}
+
+.weekday-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.analysis-chart {
+  width: 100%;
+  height: 180px;
+  background: #f5f3fa;
+  border-radius: 12px;
+  display: block;
+}
+
+.legend-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  color: #5d5b70;
+  font-size: 0.84rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.current {
+  background: #7867dc;
+}
+
+.legend-dot.average {
+  background: #4f9db8;
+}
+
+.legend-dot.cumulative {
+  background: #d38e44;
 }
 
 .data-calendar-card {
