@@ -56,6 +56,13 @@ body {
   gap: 10px;
 }
 
+.view-settings {
+  display: block;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+}
+
 .page-title {
   margin: 0;
   font-size: 1.95rem;
@@ -239,17 +246,19 @@ body {
 }
 
 .settings-title {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 1.8rem;
 }
 
 .settings-sub {
-  margin: 4px 0 12px;
+  margin: 0 0 12px;
   color: #adadbc;
 }
 
 .settings-card {
   margin-bottom: 10px;
+  width: 100%;
+  display: block;
 }
 
 .mode-row {
