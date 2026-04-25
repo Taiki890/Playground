@@ -14,9 +14,21 @@ const trendArrowEl = document.getElementById("trend-arrow");
 const trendAverageEl = document.getElementById("trend-average");
 const historyListEl = document.getElementById("history-list");
 const incrementButton = document.getElementById("increment-button");
+
 const viewHomeEl = document.getElementById("view-home");
+const viewDataEl = document.getElementById("view-data");
 const viewSettingsEl = document.getElementById("view-settings");
 const navItems = document.querySelectorAll(".nav-item");
+
+const calendarMonthEl = document.getElementById("calendar-month");
+const calendarGridEl = document.getElementById("calendar-grid");
+const calendarPrevButton = document.getElementById("calendar-prev");
+const calendarNextButton = document.getElementById("calendar-next");
+const selectedDateLabelEl = document.getElementById("selected-date-label");
+const dataRecordListEl = document.getElementById("data-record-list");
+const dataAddOneButton = document.getElementById("data-add-one");
+const dataAddBatchButton = document.getElementById("data-add-batch");
+
 const packPriceInput = document.getElementById("pack-price-input");
 const savePackPriceButton = document.getElementById("save-pack-price-button");
 const exportButton = document.getElementById("export-button");
@@ -26,8 +38,11 @@ const importFileInput = document.getElementById("import-file-input");
 let dbPromise;
 let currentRecords = [];
 let currentSettings = { packPrice: DEFAULT_PACK_PRICE };
+let currentView = "home";
 let timerId = null;
 let elapsedBaseTime = null;
+let selectedDate = new Date();
+let calendarCursor = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
 
 const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
   month: "2-digit",
@@ -36,6 +51,11 @@ const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
 const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   month: "2-digit",
   day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+const timeFormatter = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
   hour12: false,
@@ -63,6 +83,7 @@ function normalizeRecord(raw) {
   if (Number.isNaN(dt.getTime())) return null;
   const quantity = Number(raw.quantity);
   return {
+    id: raw.id,
     createdAt: dt.toISOString(),
     dayKey: getTodayKey(dt),
     quantity: Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1,
@@ -86,6 +107,11 @@ function getMonthRecords(records, now = new Date()) {
     const dt = new Date(r.createdAt);
     return dt.getFullYear() === y && dt.getMonth() === m;
   });
+}
+
+function getRecordsByDate(records, date) {
+  const key = getTodayKey(date);
+  return records.filter((r) => r.dayKey === key);
 }
 
 function getLatestRecord(records) {
@@ -121,21 +147,32 @@ function calcTrendArrow(records, now = new Date()) {
   return { arrow, average: avg };
 }
 
+function parseHHMM(value) {
+  const m = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(value.trim());
+  if (!m) return null;
+  return { hour: Number(m[1]), minute: Number(m[2]) };
+}
+
+function combineDateAndTime(baseDate, hhmm) {
+  const parsed = parseHHMM(hhmm);
+  if (!parsed) return null;
+  const dt = new Date(baseDate);
+  dt.setHours(parsed.hour, parsed.minute, 0, 0);
+  return dt;
+}
+
 function renderElapsedOnly() {
   if (!elapsedBaseTime) {
     elapsedEl.textContent = "00:00:00";
     return;
   }
-  const diff = (Date.now() - elapsedBaseTime) / 1000;
-  elapsedEl.textContent = formatDuration(diff);
+  elapsedEl.textContent = formatDuration((Date.now() - elapsedBaseTime) / 1000);
 }
 
 function startElapsedTimer() {
   if (timerId !== null) clearInterval(timerId);
   renderElapsedOnly();
-  timerId = setInterval(() => {
-    renderElapsedOnly();
-  }, 1000);
+  timerId = setInterval(renderElapsedOnly, 1000);
 }
 
 function openDatabase() {
@@ -170,20 +207,17 @@ async function getAllRecords() {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(RECORD_STORE, "readonly");
     const request = tx.objectStore(RECORD_STORE).getAll();
-    request.onsuccess = () => {
-      resolve(request.result.map(normalizeRecord).filter(Boolean));
-    };
+    request.onsuccess = () => resolve(request.result.map(normalizeRecord).filter(Boolean));
     request.onerror = () => reject(request.error);
   });
 }
 
-async function addRecord(quantity = 1, trendEligible = true) {
+async function addRecordByDate(dateObj, quantity = 1, trendEligible = true) {
   const db = await openDatabase();
-  const now = new Date();
   const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1;
   const payload = {
-    createdAt: now.toISOString(),
-    dayKey: getTodayKey(now),
+    createdAt: dateObj.toISOString(),
+    dayKey: getTodayKey(dateObj),
     quantity: safeQuantity,
     trendEligible,
   };
@@ -192,6 +226,41 @@ async function addRecord(quantity = 1, trendEligible = true) {
     const tx = db.transaction(RECORD_STORE, "readwrite");
     tx.objectStore(RECORD_STORE).add(payload);
     tx.oncomplete = () => resolve(payload);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function updateRecordById(id, patch) {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(RECORD_STORE, "readwrite");
+    const store = tx.objectStore(RECORD_STORE);
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const existing = getReq.result;
+      if (!existing) {
+        reject(new Error("record not found"));
+        return;
+      }
+      const merged = { ...existing, ...patch };
+      if (merged.createdAt) {
+        const dt = new Date(merged.createdAt);
+        merged.dayKey = getTodayKey(dt);
+      }
+      store.put(merged);
+    };
+    getReq.onerror = () => reject(getReq.error);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteRecordById(id) {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(RECORD_STORE, "readwrite");
+    tx.objectStore(RECORD_STORE).delete(id);
+    tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
 }
@@ -233,6 +302,7 @@ function renderHome() {
 
   dailyCountEl.textContent = String(todayCount);
   monthlyCostEl.textContent = numberFormatter.format(monthlyCost);
+
   const trend = calcTrendArrow(currentRecords, now);
   trendArrowEl.textContent = trend.arrow;
   trendAverageEl.textContent = `avg ${trend.average.toFixed(1)}`;
@@ -252,25 +322,121 @@ function renderHome() {
     li.className = "history-item history-empty";
     li.textContent = "まだ記録はありません";
     historyListEl.appendChild(li);
-  } else {
-    for (const rec of recent) {
-      const li = document.createElement("li");
-      li.className = "history-item";
-      const label = rec.quantity > 1 ? ` x${rec.quantity}` : "";
-      li.textContent = `${dateTimeFormatter.format(new Date(rec.createdAt))}${label}`;
-      historyListEl.appendChild(li);
-    }
+    return;
+  }
+
+  for (const rec of recent) {
+    const li = document.createElement("li");
+    li.className = "history-item";
+    const suffix = rec.quantity > 1 ? ` x${rec.quantity}` : "";
+    li.textContent = `${dateTimeFormatter.format(new Date(rec.createdAt))}${suffix}`;
+    historyListEl.appendChild(li);
   }
 }
 
+function renderCalendar() {
+  const y = calendarCursor.getFullYear();
+  const m = calendarCursor.getMonth();
+  calendarMonthEl.textContent = `${y}/${String(m + 1).padStart(2, "0")}`;
+  calendarGridEl.innerHTML = "";
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i += 1) {
+    const dayNum = i - firstDay + 1;
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "cal-cell";
+
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      cell.classList.add("muted");
+      cell.disabled = true;
+      cell.textContent = "";
+    } else {
+      cell.textContent = String(dayNum);
+      const dateObj = new Date(y, m, dayNum);
+      const key = getTodayKey(dateObj);
+      const dayCount = countCigarettes(getRecordsByDate(currentRecords, dateObj));
+      if (dayCount > 0) cell.dataset.count = String(dayCount);
+
+      if (key === getTodayKey(new Date())) cell.classList.add("today");
+      if (key === getTodayKey(selectedDate)) cell.classList.add("selected");
+
+      cell.addEventListener("click", () => {
+        selectedDate = dateObj;
+        renderData();
+      });
+    }
+    calendarGridEl.appendChild(cell);
+  }
+}
+
+function renderDataList() {
+  const records = getRecordsByDate(currentRecords, selectedDate)
+    .slice()
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+  dataRecordListEl.innerHTML = "";
+  if (records.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "data-empty";
+    empty.textContent = "選択日のデータはありません";
+    dataRecordListEl.appendChild(empty);
+    return;
+  }
+
+  for (const rec of records) {
+    const item = document.createElement("div");
+    item.className = "data-row";
+
+    const info = document.createElement("p");
+    info.className = "data-row-text";
+    const trendText = rec.trendEligible ? "分析: 使う" : "分析: 使わない";
+    info.textContent = `${timeFormatter.format(new Date(rec.createdAt))} / 本数 ${rec.quantity} / ${trendText}`;
+
+    const actions = document.createElement("div");
+    actions.className = "data-row-actions";
+
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "mini-action";
+    edit.textContent = "変更";
+    edit.addEventListener("click", () => onEditRecord(rec));
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "mini-action danger";
+    del.textContent = "削除";
+    del.addEventListener("click", () => onDeleteRecord(rec));
+
+    actions.appendChild(edit);
+    actions.appendChild(del);
+    item.appendChild(info);
+    item.appendChild(actions);
+    dataRecordListEl.appendChild(item);
+  }
+}
+
+function renderData() {
+  selectedDateLabelEl.textContent = dateFormatter.format(selectedDate);
+  renderCalendar();
+  renderDataList();
+}
+
 function switchView(viewName) {
-  const settings = viewName === "settings";
-  viewHomeEl.classList.toggle("hidden", settings);
-  viewSettingsEl.classList.toggle("hidden", !settings);
-  incrementButton.classList.toggle("hidden", settings);
+  currentView = viewName;
+  viewHomeEl.classList.toggle("hidden", viewName !== "home");
+  viewDataEl.classList.toggle("hidden", viewName !== "data");
+  viewSettingsEl.classList.toggle("hidden", viewName !== "settings");
+  incrementButton.classList.toggle("hidden", viewName !== "home");
+
   navItems.forEach((item) => {
     item.classList.toggle("is-active", item.dataset.view === viewName);
   });
+
+  if (viewName === "data") renderData();
 }
 
 async function refreshScreen() {
@@ -278,6 +444,7 @@ async function refreshScreen() {
   currentSettings = await getSettings();
   packPriceInput.value = String(currentSettings.packPrice);
   renderHome();
+  if (currentView === "data") renderData();
 }
 
 async function exportData() {
@@ -331,16 +498,112 @@ async function requestPersistentStorage() {
   }
 }
 
+async function onAddSingle() {
+  const defaultTime = getTodayKey(selectedDate) === getTodayKey(new Date())
+    ? timeFormatter.format(new Date())
+    : "12:00";
+  const hhmm = prompt("時刻を入力 (HH:mm)", defaultTime);
+  if (hhmm === null) return;
+  const dt = combineDateAndTime(selectedDate, hhmm);
+  if (!dt) {
+    alert("時刻形式が不正です。例: 14:30");
+    return;
+  }
+  await addRecordByDate(dt, 1, true);
+  await refreshScreen();
+}
+
+async function onAddBatch() {
+  const qtyText = prompt("本数を入力 (2以上)");
+  if (qtyText === null) return;
+  const qty = Number(qtyText);
+  if (!Number.isFinite(qty) || qty < 2) {
+    alert("本数は2以上の数値を入力してください。");
+    return;
+  }
+  const hhmm = prompt("代表時刻を入力 (HH:mm)", "23:59");
+  if (hhmm === null) return;
+  const dt = combineDateAndTime(selectedDate, hhmm);
+  if (!dt) {
+    alert("時刻形式が不正です。例: 23:59");
+    return;
+  }
+  await addRecordByDate(dt, Math.floor(qty), false);
+  await refreshScreen();
+}
+
+async function onEditRecord(rec) {
+  const currentTime = timeFormatter.format(new Date(rec.createdAt));
+  const timeText = prompt("時刻を入力 (HH:mm)", currentTime);
+  if (timeText === null) return;
+  const dt = combineDateAndTime(selectedDate, timeText);
+  if (!dt) {
+    alert("時刻形式が不正です。");
+    return;
+  }
+
+  const qtyText = prompt("本数を入力 (1以上)", String(rec.quantity));
+  if (qtyText === null) return;
+  const qty = Number(qtyText);
+  if (!Number.isFinite(qty) || qty < 1) {
+    alert("本数は1以上で入力してください。");
+    return;
+  }
+
+  const trendText = prompt("分析に使う? y/n", rec.trendEligible ? "y" : "n");
+  if (trendText === null) return;
+  const trendEligible = trendText.trim().toLowerCase() !== "n";
+
+  await updateRecordById(rec.id, {
+    createdAt: dt.toISOString(),
+    quantity: Math.floor(qty),
+    trendEligible,
+  });
+  await refreshScreen();
+}
+
+async function onDeleteRecord(rec) {
+  const yes = confirm(`削除しますか?\n${dateTimeFormatter.format(new Date(rec.createdAt))} / ${rec.quantity}本`);
+  if (!yes) return;
+  await deleteRecordById(rec.id);
+  await refreshScreen();
+}
+
 incrementButton.addEventListener("click", async () => {
   incrementButton.disabled = true;
   try {
-    await addRecord(1, true);
+    await addRecordByDate(new Date(), 1, true);
     await refreshScreen();
   } catch (error) {
     console.error(error);
     alert("記録に失敗しました。");
   } finally {
     incrementButton.disabled = false;
+  }
+});
+
+calendarPrevButton.addEventListener("click", () => {
+  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1);
+  renderData();
+});
+calendarNextButton.addEventListener("click", () => {
+  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1);
+  renderData();
+});
+dataAddOneButton.addEventListener("click", async () => {
+  try {
+    await onAddSingle();
+  } catch (error) {
+    console.error(error);
+    alert("追加に失敗しました。");
+  }
+});
+dataAddBatchButton.addEventListener("click", async () => {
+  try {
+    await onAddBatch();
+  } catch (error) {
+    console.error(error);
+    alert("一括追加に失敗しました。");
   }
 });
 
@@ -390,7 +653,9 @@ importButton.addEventListener("click", async () => {
 navItems.forEach((item) => {
   item.addEventListener("click", () => {
     const view = item.dataset.view;
-    if (view === "home" || view === "settings") switchView(view);
+    if (view === "home" || view === "data" || view === "settings") {
+      switchView(view);
+    }
   });
 });
 

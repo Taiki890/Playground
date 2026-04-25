@@ -47,6 +47,14 @@ body {
   gap: 10px;
 }
 
+.view-data,
+.view-settings {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: 10px;
+}
+
 .page-title {
   margin: 0;
   font-size: 1.95rem;
@@ -241,6 +249,157 @@ body {
 
 .settings-card {
   margin-bottom: 10px;
+}
+
+.data-calendar-card {
+  display: grid;
+  gap: 10px;
+}
+
+.calendar-head {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-month {
+  margin: 0;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.mini-button {
+  border: 0;
+  border-radius: 10px;
+  background: #d6d2e2;
+  color: #2e2c3a;
+  font-size: 1.3rem;
+  height: 34px;
+}
+
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.cal-cell {
+  border: 0;
+  border-radius: 10px;
+  min-height: 34px;
+  background: #d8d4e4;
+  color: #29273a;
+  font-size: 0.85rem;
+  position: relative;
+}
+
+.cal-cell[data-count]:not([data-count="0"])::after {
+  content: attr(data-count);
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  font-size: 0.62rem;
+  color: #59566d;
+}
+
+.cal-cell.today {
+  outline: 2px solid #6f60cc;
+}
+
+.cal-cell.selected {
+  background: #7b6adf;
+  color: #fff;
+}
+
+.cal-cell.muted {
+  background: #efedf5;
+}
+
+.data-list-card {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.data-list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.data-action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.action-button.slim {
+  margin-top: 0;
+}
+
+.action-button.slim.alt {
+  background: #5c5b6b;
+  border-color: #5c5b6b;
+}
+
+.data-record-list {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-row {
+  border: 1px solid rgba(20, 18, 34, 0.12);
+  border-radius: 12px;
+  background: #f4f2fa;
+  padding: 8px 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.data-row-text {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #252337;
+}
+
+.data-row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mini-action {
+  border: 0;
+  border-radius: 8px;
+  background: #7667d8;
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.mini-action.danger {
+  background: #c6526b;
+}
+
+.data-empty {
+  margin: 8px 0 0;
+  color: #5d5b70;
+  font-size: 0.9rem;
 }
 
 .note {

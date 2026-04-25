@@ -1,26 +1,25 @@
 # tasks
 
-## Phase 1: 実装済み
+## Phase 1: Dataタブ実装
 
-- [x] Home新UI（カード構成、下部ナビ）
-- [x] レコードの `quantity` / `trendEligible` 対応
-- [x] トレンド矢印判定
-- [x] トレンド平均値表示（矢印横）
-- [x] 今月金額計算
-- [x] Settings（packPrice保存、JSON export/import）
-- [x] Home `+` ボタン横長化
-- [x] 履歴エリア内スクロール化
-- [x] SW登録失敗時の起動継続
+- [x] Bottom nav の Trend を Data に変更
+- [x] Data画面のレイアウト追加
+- [x] 月カレンダー表示追加
+- [x] 日付選択ロジック追加（当日デフォルト）
+- [x] 選択日データ一覧表示
+- [x] 追加ボタン実装
+- [x] 一括追加ボタン実装
+- [x] 変更機能実装
+- [x] 削除機能実装
 
-## Phase 2: 残タスク
+## Phase 2: 既存機能との整合
 
-- [ ] 一括登録UI（quantity指定）の追加
-- [ ] 一括登録時の `trendEligible=false` 入力導線
-- [ ] Analysis画面要件定義
-- [ ] Trend画面要件定義
+- [x] Data操作とHome集計の連動
+- [x] trendEligibleによるトレンド除外反映
+- [x] Home/Settings/Data の遷移整理
 
 ## Phase 3: テスト
 
-- [ ] AC-01〜AC-08 の実機確認
-- [ ] iPhone Safari とホーム画面PWA双方で確認
-- [ ] export -> data clear -> import の復元テスト
+- [ ] AC-01〜AC-08 の手動確認
+- [ ] DataでのCRUD後にHome表示更新を確認
+- [ ] export/import後にData表示が復元されることを確認

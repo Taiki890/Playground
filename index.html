@@ -50,6 +50,35 @@
       <button id="increment-button" class="fab" type="button" aria-label="1本記録する">+</button>
     </section>
 
+    <section id="view-data" class="view-data hidden">
+      <h2 class="settings-title">Data</h2>
+      <p class="settings-sub">過去データ管理</p>
+
+      <section class="card data-calendar-card">
+        <div class="calendar-head">
+          <button id="calendar-prev" class="mini-button" type="button" aria-label="前月">‹</button>
+          <p id="calendar-month" class="calendar-month">0000/00</p>
+          <button id="calendar-next" class="mini-button" type="button" aria-label="次月">›</button>
+        </div>
+        <div class="calendar-week">
+          <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+        </div>
+        <div id="calendar-grid" class="calendar-grid"></div>
+      </section>
+
+      <section class="card data-list-card">
+        <div class="data-list-head">
+          <p class="card-label">選択日データ</p>
+          <p id="selected-date-label" class="date-text">--/--</p>
+        </div>
+        <div class="data-action-row">
+          <button id="data-add-one" class="action-button slim" type="button">追加</button>
+          <button id="data-add-batch" class="action-button slim alt" type="button">一括追加</button>
+        </div>
+        <div id="data-record-list" class="data-record-list"></div>
+      </section>
+    </section>
+
     <section id="view-settings" class="view-settings hidden">
       <h2 class="settings-title">Settings</h2>
       <p class="settings-sub">データ管理</p>
@@ -78,7 +107,7 @@
   <nav class="bottom-nav" aria-label="メインナビ">
     <button class="nav-item is-active" data-view="home" type="button">Home</button>
     <button class="nav-item" data-view="analysis" type="button" disabled>Analysis</button>
-    <button class="nav-item" data-view="trend" type="button" disabled>Trend</button>
+    <button class="nav-item" data-view="data" type="button">Data</button>
     <button class="nav-item" data-view="settings" type="button">Settings</button>
   </nav>
 
